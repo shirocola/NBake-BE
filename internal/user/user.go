@@ -3,12 +3,26 @@ package user
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/shirocola/NBake-BE/internal/auth"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
 	Username string
 	Password string
 	ID       string
+	Role     string
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 // HandleLogin handles user login requests
@@ -21,7 +35,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if usr.Login(usr.Username, usr.Password) {
-		token, err := GenerateToken(usr.Username)
+		token, err := auth.GenerateToken(usr.Username)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
