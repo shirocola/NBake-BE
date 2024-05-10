@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"time"
@@ -60,4 +61,16 @@ func RoleCheckMiddleware(requiredRole string) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "login successful"})
+}
+
+func SetupRoutes() http.Handler {
+	mux := http.NewServeMux()
+	// setup routes
+	mux.HandleFunc("/login", loginHandler)
+	return mux
 }
