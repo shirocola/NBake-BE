@@ -1,21 +1,36 @@
 package user
 
 import (
+	"reflect"
 	"testing"
 )
 
 func TestLogin(t *testing.T) {
-	u := User{}
-	username := "testuser"
-	password := "testpassword"
-
-	// Test case 1
-	if success := u.Login(username, password); !success {
-		t.Errorf("login was not successful for user %s", username)
+	cases := []struct {
+		name     string
+		user     User
+		expected bool
+	}{
+		{"valid user", User{Username: "testuser", Password: "testpassword"}, true},
+		{"invalid user", User{Username: "admin", Password: "admin1"}, false},
 	}
 
-	// Test case 2
-	if u.Login("admin", "admin1") != false {
-		t.Error("Expected: false, got: true")
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if res := c.user.Login(c.user.Username, c.user.Password); res != c.expected {
+				t.Errorf("Expected %v, got %v", c.expected, res)
+			}
+		})
+	}
+}
+
+func TestAddUser(t *testing.T) {
+	expectedUser := User{ID: "1", Username: "John"}
+	result, err := AddUser("John")
+	if err != nil {
+		t.Error("Error should be nil")
+	}
+	if !reflect.DeepEqual(expectedUser, result) {
+		t.Errorf("Expected: %v, got: %v", expectedUser, result)
 	}
 }
